@@ -1,0 +1,29 @@
+services:
+  auth-service:
+    build: ./backend/auth-service
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/auth-service:/usr/src/app
+      - /usr/src/app/node_modules
+    env_file:
+      - ./backend/auth-service/.env
+    environment:
+      - DATABASE_URL=postgres://user:password@database:5432/touristdb
+    depends_on:
+      - database
+
+  database:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=touristdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+

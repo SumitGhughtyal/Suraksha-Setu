@@ -1,0 +1,6 @@
+This file tells Git to ignore these files within this service folder.
+Dependency directory
+node_modules
+
+Environment variables file (contains secrets)
+.env
