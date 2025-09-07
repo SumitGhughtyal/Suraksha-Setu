@@ -1,0 +1,14 @@
+{
+  "name": "location-service",
+  "version": "1.0.0",
+  "description": "Handles GPS location data for the Suraksha-Setu system.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.11.5",
+    "dotenv": "^16.4.5"
+  }
+}

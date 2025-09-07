@@ -3,18 +3,32 @@ services:
     build: ./backend/auth-service
     ports:
       - "8080:8080"
-    volumes:
-      - ./backend/auth-service:/usr/src/app
-      - /usr/src/app/node_modules
     env_file:
       - ./backend/auth-service/.env
     environment:
       - DATABASE_URL=postgres://user:password@database:5432/touristdb
     depends_on:
-      - database
+      database:
+        condition: service_healthy
+    # --- ADDED RESTART POLICY ---
+    restart: on-failure
+
+  location-service:
+    build: ./backend/location-service
+    ports:
+      - "8081:8081"
+    env_file:
+      - ./backend/location-service/.env
+    environment:
+      - DATABASE_URL=postgres://user:password@database:5432/touristdb
+    depends_on:
+      database:
+        condition: service_healthy
+    # --- ADDED RESTART POLICY ---
+    restart: on-failure
 
   database:
-    image: postgres:15-alpine
+    image: postgis/postgis
     ports:
       - "5432:5432"
     environment:
@@ -23,6 +37,11 @@ services:
       - POSTGRES_DB=touristdb
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d touristdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:

@@ -1,0 +1,20 @@
+services:
+  # Web service for the auth-service
+  - type: web
+    name: auth-service
+    env: docker
+    dockerfilePath: ./auth-service/Dockerfile
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromGroup: suraksha-setu-secrets
+
+  # Web service for the location-service
+  - type: web
+    name: location-service
+    env: docker
+    dockerfilePath: ./location-service/Dockerfile
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromGroup: suraksha-setu-secrets
