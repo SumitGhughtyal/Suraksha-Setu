@@ -6,8 +6,7 @@ services:
     dockerfilePath: ./auth-service/Dockerfile
     plan: free
     envVars:
-      - key: DATABASE_URL
-        fromGroup: suraksha-setu-secrets
+      - fromGroup: suraksha-setu-secrets # Corrected line
 
   # Web service for the location-service
   - type: web
@@ -16,5 +15,4 @@ services:
     dockerfilePath: ./location-service/Dockerfile
     plan: free
     envVars:
-      - key: DATABASE_URL
-        fromGroup: suraksha-setu-secrets
+      - fromGroup: suraksha-setu-secrets # Corrected line
