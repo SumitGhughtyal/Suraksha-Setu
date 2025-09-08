@@ -72,18 +72,39 @@ app.post('/location', async (req, res) => {
   if (touristId === undefined || latitude === undefined || longitude === undefined || timestamp === undefined) {
     return res.status(400).json({ message: 'Missing required location data.' });
   }
+
+  const client = await pool.connect();
   try {
-    const client = await pool.connect();
-    const query = `
+    // Step 1: Insert the new location into the history table (as before)
+    const insertQuery = `
       INSERT INTO location_history (tourist_id, latitude, longitude, timestamp)
       VALUES ($1, $2, $3, $4)
     `;
-    await client.query(query, [touristId, latitude, longitude, timestamp]);
-    client.release();
+    await client.query(insertQuery, [touristId, latitude, longitude, timestamp]);
+    
+    // --- NEW: Step 2: Check if the location is within any geofence ---
+    const geofenceCheckQuery = `
+      SELECT name FROM geofences
+      WHERE ST_Covers(area, ST_MakePoint($1, $2)::geography)
+    `;
+    const geofenceResult = await client.query(geofenceCheckQuery, [longitude, latitude]);
+
+    // Step 3: If the query returns 0 rows, the user is outside all safe zones
+    if (geofenceResult.rows.length === 0) {
+      console.log(`ALERT! Tourist ID ${touristId} is outside of any defined safe zone.`);
+      // In a real application, you would make an API call here.
+      // For example: await axios.post('https://notification-service-xxxx.onrender.com/notifications', ...);
+    } else {
+      console.log(`Tourist ID ${touristId} is safe inside ${geofenceResult.rows[0].name}.`);
+    }
+
     res.status(201).json({ message: 'Location data received successfully.' });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error while storing location data.' });
+  } finally {
+    client.release();
   }
 });
 
